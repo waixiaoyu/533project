@@ -3,11 +3,7 @@ package com.yyy.hbase;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.NavigableMap;
 
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -44,11 +40,20 @@ public class HBaseDAO {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Result r = HBaseDAO.get("ARTICLE_TOPIC20", "1");
-		NavigableMap<byte[], byte[]> maps = r.getFamilyMap("topic".getBytes());
-		for (Entry<byte[], byte[]> e : maps.entrySet()) {
-			System.out.println(new String(e.getKey()) + "-" + new String(e.getValue()));
-		}
+		// Result r = HBaseDAO.get("ARTICLE_TOPIC20", "1");
+		// NavigableMap<byte[], byte[]> maps =
+		// r.getFamilyMap("topic".getBytes());
+		// for (Entry<byte[], byte[]> e : maps.entrySet()) {
+		// System.out.println(new String(e.getKey()) + "-" + new
+		// String(e.getValue()));
+		// }
+
+		// List<Result> lResults = HBaseDAO.scanColumnByFilter("TOPIC_WORD",
+		// "word", null, null);
+		// for (Result result : lResults) {
+		// System.out.println(result.getColumnLatestCell("word".getBytes(),
+		// null));
+		// }
 	}
 
 	public static void createTable(String tableName, String[] strColumn) {
@@ -132,11 +137,18 @@ public class HBaseDAO {
 		return scanRowKeyByFilter(tableName, new RowFilter(CompareOp.EQUAL, new SubstringComparator(regex)));
 	}
 
+	/**
+	 * each result contains a rowkey with all familys and values.
+	 */
 	public static List<Result> scanColumnByFilter(String tableName, String family, String qualifier, Filter filter)
 			throws IOException {
 		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);
 		Scan scan = new Scan();
-		scan.addColumn(family.getBytes(), qualifier.getBytes());
+		if (qualifier == null || qualifier.equals("")) {
+			scan.addFamily(family.getBytes());
+		} else {
+			scan.addColumn(family.getBytes(), qualifier.getBytes());
+		}
 		scan.setFilter(filter);
 		ResultScanner resultScanner = table.getScanner(scan);
 		List<Result> lResults = new ArrayList<>();
@@ -144,6 +156,10 @@ public class HBaseDAO {
 			lResults.add(rs);
 		}
 		return lResults;
+	}
+
+	public static List<Result> scanColumnByFilter(String tableName, String family, Filter filter) throws IOException {
+		return scanColumnByFilter(tableName, family, null, filter);
 	}
 
 	public static List<Result> scanColumnBySubString(String tableName, String family, String qualifier,

@@ -1,7 +1,6 @@
 package edu.stanford.nlp;
 
 import java.io.StringReader;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 
-class Tagging {
+public class Tagging {
 
 	private static final String PARSE_MODEL_PATH = "englishPCFG.ser.gz";
 
@@ -26,10 +25,20 @@ class Tagging {
 	}
 
 	public static void main(String[] args) {
-		Tagging t = new Tagging();
-		String sent = "Showers continued throughout the week in the Bahia cocoa zone.";
-		List l = t.searchByTag(t.TaggingSentence(sent), "NN");
-		System.out.println(l);
+//		Tagging t = new Tagging();
+//		String sent = "Showers continued throughout the week in the Bahia cocoa zone.";
+//		List<String> l = t.searchByTag(sent, "NN");
+	}
+
+	public List<String> searchByTag(String sent, String pre) {
+		List<String> list = new LinkedList<>();
+		List<TaggedWord> taggedWords = taggingSentence(sent);
+		for (TaggedWord tw : taggedWords) {
+			if (tw.tag().startsWith(pre)) {
+				list.add(tw.word());
+			}
+		}
+		return list;
 	}
 
 	/**
@@ -40,26 +49,18 @@ class Tagging {
 	 * to print out. Once again, one can capture the output by passing a
 	 * PrintWriter to TreePrint.printTree. This code is for English.
 	 */
-	private List<TaggedWord> TaggingSentence(String sent) {
+	private List<TaggedWord> taggingSentence(String sent) {
 
 		// This option shows loading and using an explicit tokenizer
 		TokenizerFactory<CoreLabel> tokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
 		Tokenizer<CoreLabel> tok = tokenizerFactory.getTokenizer(new StringReader(sent));
 		List<CoreLabel> rawWords = tok.tokenize();
 		Tree parse = lp.apply(rawWords);
+		/**
+		 * tageerwords are like, [Showers/NNS, continued/VBD, throughout/IN ...
+		 */
 		List<TaggedWord> taggedWords = parse.taggedYield();
-		System.out.println(taggedWords);
 		return taggedWords;
-	}
-
-	private List<String> searchByTag(List<TaggedWord> taggedWords, String pre) {
-		List<String> list = new LinkedList<>();
-		for (TaggedWord tw : taggedWords) {
-			if (tw.tag().startsWith(pre)) {
-				list.add(tw.word());
-			}
-		}
-		return list;
 	}
 
 	/**
@@ -76,7 +77,5 @@ class Tagging {
 	 * Verb, 3rd person singular present; WDT Wh­determiner; WP Wh­pronoun; WP$
 	 * Possessive wh­pronoun; WRB Wh­adverb;
 	 */
-	private Tagging() {
-	} // static methods only
 
 }
