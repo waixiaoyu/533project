@@ -61,10 +61,15 @@ public class FindRelatedArticleId {
 	 * 
 	 */
 	public String searchArticleId(List<WordTopicProb> wtps) throws IOException {
+		int n = 0;
 		for (WordTopicProb wordTopicProb : wtps) {
-			Result r = queryArticleByTopicRowKey(wordTopicProb.getTopicId());
-			System.out.println(r.getColumnCells("article".getBytes(), "".getBytes()));
+			List<Cell> lCells = queryArticleByTopicRowKey(wordTopicProb.getTopicId());
+			for (Cell cell : lCells) {
+				System.out.println(new String(CellUtil.cloneQualifier(cell)));
+				n++;
+			}
 		}
+		System.out.println(n);
 		return null;
 	}
 

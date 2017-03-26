@@ -42,6 +42,7 @@ public class CreateTOPIC_ARTICLE {
 				String articleId = new String(CellUtil.cloneRow(c));
 				String topicId = new String(CellUtil.cloneQualifier(c));
 				String prob = new String(CellUtil.cloneValue(c));
+				topicId = topicId.length() < 2 ? "0" + topicId : topicId;
 				Put put = new Put(topicId.getBytes());
 				put.addColumn("article".getBytes(), articleId.getBytes(), prob.getBytes());
 				lPuts.add(put);
