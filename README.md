@@ -1,1 +1,1 @@
-# 533project
+# Hbase and CoreNLP project
