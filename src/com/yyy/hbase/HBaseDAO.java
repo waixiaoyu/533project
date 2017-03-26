@@ -2,8 +2,11 @@ package com.yyy.hbase;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellScanner;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -107,6 +110,20 @@ public class HBaseDAO {
 		 * String(result.getValue("content".getBytes(), "count".getBytes()));
 		 */
 		return result;
+	}
+
+	/**
+	 *
+	 * get Cells, by rowKey
+	 */
+	public static List<Cell> getCellsByRowKey(String tableName, String rowKey) throws IOException {
+		List<Cell> lCells = new LinkedList<>();
+		Result result = get(tableName, rowKey);
+		CellScanner cScanner = result.cellScanner();
+		while (cScanner.advance()) {
+			lCells.add(cScanner.current());
+		}
+		return lCells;
 	}
 
 	/**
