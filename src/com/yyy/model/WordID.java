@@ -46,6 +46,11 @@ public class WordID {
 		return id;
 	}
 
+	@Override
+	public String toString() {
+		return "WordID [word=" + word + ", id=" + id + "]";
+	}
+
 	public static void main(String[] args) throws IOException {
 		Result r = HBaseDAO.get("WORD_ID", "apple");
 		Cell c = r.getColumnLatestCell("id".getBytes(), "".getBytes());

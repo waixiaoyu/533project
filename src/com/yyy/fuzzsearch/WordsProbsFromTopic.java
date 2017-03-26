@@ -1,7 +1,6 @@
 package com.yyy.fuzzsearch;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,10 +23,12 @@ public class WordsProbsFromTopic {
 		String sent = "Showers continued throughout the week in the Bahia cocoa zone.";
 		List<String> l = t.searchByTag(sent, "NN");
 		List<WordTopicProb> wtps = new LinkedList<WordTopicProb>();
-		wtps.add(new WordTopicProb("Showers"));
+		for (String str : l) {
+			wtps.add(new WordTopicProb(str));
+		}
 		WordsProbsFromTopic wpft = new WordsProbsFromTopic();
 		wpft.getHighestProbInTopic(wtps);
-		System.out.println(l);
+		System.out.println(wtps);
 	}
 
 	private static class WordTopicProb {
@@ -35,22 +36,16 @@ public class WordsProbsFromTopic {
 		private String topicId;
 		private double prob = 0;
 
-		// public WordTopicProb(WordID wi, String topicId, double prob) {
-		// super();
-		// this.wi = wi;
-		// this.topicId = topicId;
-		// this.prob = prob;
-		// }
-		//
-		// public WordTopicProb(WordID wi) {
-		// super();
-		// this.wi = wi;
-		// }
-
 		public WordTopicProb(String word) throws IOException {
 			super();
 			this.wi = new WordID(word);
 		}
+
+		@Override
+		public String toString() {
+			return "WordTopicProb [wi=" + wi + ", topicId=" + topicId + ", prob=" + prob + "]";
+		}
+
 	}
 
 	public void getHighestProbInTopic(List<WordTopicProb> wtps) throws IOException {
@@ -66,9 +61,18 @@ public class WordsProbsFromTopic {
 				 * timestamp=1490467209306, value=0.014274839791157254
 				 */
 				Cell c = cScanner.current();
-				System.out.println(new String(CellUtil.cloneRow(c)));
-				System.out.println(new String(CellUtil.cloneQualifier(c)));
-				System.out.println(new String(CellUtil.cloneValue(c)));
+				String topicId = new String(CellUtil.cloneRow(c));
+				String wordId = new String(CellUtil.cloneQualifier(c));
+				double prob = Double.parseDouble(new String(CellUtil.cloneValue(c)));
+				for (WordTopicProb wtp : wtps) {
+					if (wtp.wi.getId().equals(wordId)) {
+						if (wtp.prob < prob) {
+							wtp.prob = prob;
+							wtp.topicId = topicId;
+						}
+						break;
+					}
+				}
 			}
 		}
 	}
