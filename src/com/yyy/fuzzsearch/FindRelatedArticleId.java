@@ -1,9 +1,11 @@
 package com.yyy.fuzzsearch;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
@@ -30,25 +32,6 @@ public class FindRelatedArticleId {
 
 	public static void main(String[] args) throws IOException {
 
-		FindRelatedArticleId f = new FindRelatedArticleId();
-		Tagging t = new Tagging();
-		String sent = "Showers continued throughout the week in the Bahia cocoa zone.";
-		List<String> l = t.searchByTag(sent, "NN");
-		List<WordTopicProb> wtps = new LinkedList<WordTopicProb>();
-		for (String str : l) {
-			wtps.add(new WordTopicProb(str));
-		}
-		f.getHighestProbInTopic(wtps);
-
-		Iterator<WordTopicProb> it = wtps.iterator();
-		while (it.hasNext()) {
-			WordTopicProb wordTopicProb = (WordTopicProb) it.next();
-			if (StringUtils.isEmpty(wordTopicProb.getTopicId())) {
-				it.remove();
-			}
-		}
-		System.out.println(wtps);
-		f.searchArticleId(wtps);
 	}
 
 	private List<Cell> queryArticleByTopicRowKey(String rowKey) throws IOException {
@@ -56,21 +39,18 @@ public class FindRelatedArticleId {
 	}
 
 	/**
-	 * from Result, and get article ids as a String split by ",". For example,
-	 * if the article ids are 13212 and 23221, the string can be 13212,23221.
-	 * 
+	 * from Result, and get article ids, stored in a set, which can not contain
+	 * repeated elements
 	 */
-	public String searchArticleId(List<WordTopicProb> wtps) throws IOException {
-		int n = 0;
+	public Set<String> searchArticleId(List<WordTopicProb> wtps) throws IOException {
+		Set<String> set = new HashSet<>();
 		for (WordTopicProb wordTopicProb : wtps) {
 			List<Cell> lCells = queryArticleByTopicRowKey(wordTopicProb.getTopicId());
 			for (Cell cell : lCells) {
-				System.out.println(new String(CellUtil.cloneQualifier(cell)));
-				n++;
+				set.add(new String(CellUtil.cloneQualifier(cell)));
 			}
 		}
-		System.out.println(n);
-		return null;
+		return set;
 	}
 
 	/**
