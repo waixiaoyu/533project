@@ -7,14 +7,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.hbase.client.Result;
 
+import com.yyy.hbase.HBaseDAO;
 import com.yyy.model.WordTopicProb;
 
 import edu.stanford.nlp.Tagging;
 
 public class FuzzSearch {
-	public static void main(String[] args) throws IOException {
 
+	private static final String ARTICLE_TABLE_NAME = "ARTICLE_ALIAS_TITLE_CONTENT";
+
+	public static void main(String[] args) throws IOException {
 		FindRelatedArticleId f = new FindRelatedArticleId();
 		Tagging t = new Tagging();
 		String sent = "Showers continued throughout the week in the Bahia cocoa zone.";
@@ -34,6 +38,13 @@ public class FuzzSearch {
 		}
 		System.out.println(wtps);
 		Set<String> set = f.searchArticleId(wtps);
-		System.out.println(set.size());
+		System.out.println(set);
 	}
+
+	public String getArticleContentById(String rowKey) throws IOException {
+		Result r = HBaseDAO.get(ARTICLE_TABLE_NAME, rowKey);
+
+		return null;
+	}
+
 }

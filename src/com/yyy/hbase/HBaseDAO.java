@@ -12,13 +12,15 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
@@ -101,7 +103,26 @@ public class HBaseDAO {
 	 */
 	public static Result get(String tableName, String rowKey) throws IOException {
 		Get get = new Get(rowKey.getBytes());
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);// 获取表
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
+		Result result = table.get(get);
+		/**
+		 * you can use the following sentence to get each value.
+		 * System.out.println(new String(result.getValue("content".getBytes(),
+		 * "count".getBytes()))); return new
+		 * String(result.getValue("content".getBytes(), "count".getBytes()));
+		 */
+		return result;
+	}
+
+	/**
+	 *
+	 * get cell
+	 */
+	public static Result getCell(String tableName, String rowKey) throws IOException {
+		Get get = new Get(rowKey.getBytes());
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		Result result = table.get(get);
 		/**
 		 * you can use the following sentence to get each value.
@@ -130,7 +151,8 @@ public class HBaseDAO {
 	 * scan operation of different type of filters
 	 */
 	public static List<Result> scanRowKeyByFilter(String tableName, Filter filter) throws IOException {
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		Scan scan = new Scan();
 		scan.setFilter(filter);
 		ResultScanner resultScanner = table.getScanner(scan);
@@ -159,7 +181,8 @@ public class HBaseDAO {
 	 */
 	public static List<Result> scanColumnByFilter(String tableName, String family, String qualifier, Filter filter)
 			throws IOException {
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		Scan scan = new Scan();
 		if (qualifier == null || qualifier.equals("")) {
 			scan.addFamily(family.getBytes());
@@ -199,21 +222,24 @@ public class HBaseDAO {
 	 */
 	public static void put(String tableName, String rowKey, String family, String qualifier, String value)
 			throws IOException {
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);// 获取表
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		Put put = new Put(rowKey.getBytes());
 		put.addColumn(family.getBytes(), qualifier.getBytes(), value.getBytes());
 		table.put(put);
 	}
 
 	public static void put(String tableName, String rowKey, String family, String value) throws IOException {
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);// 获取表
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		Put put = new Put(rowKey.getBytes());
 		put.addColumn(family.getBytes(), null, value.getBytes());
 		table.put(put);
 	}
 
 	public static void putAll(String tableName, List<Put> puts) throws IOException {
-		HTable table = new HTable(HBaseUtils.getConfiguration(), tableName);// 获取表
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		Table table = connection.getTable(TableName.valueOf(tableName));
 		table.put(puts);
 	}
 }
