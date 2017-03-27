@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellScanner;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -116,19 +117,28 @@ public class HBaseDAO {
 
 	/**
 	 *
-	 * get cell
+	 * get cell by family and qualifier. qualifier can be null
 	 */
-	public static Result getCell(String tableName, String rowKey) throws IOException {
+	public static List<Cell> getCells(String tableName, String rowKey, String family, String qualifier)
+			throws IOException {
 		Table table = createTable(tableName);
 		Get get = new Get(rowKey.getBytes());
+		if (StringUtils.isEmpty(qualifier)) {
+			get.addFamily(family.getBytes());
+		} else {
+			get.addColumn(family.getBytes(), qualifier.getBytes());
+		}
 		Result result = table.get(get);
-		/**
-		 * you can use the following sentence to get each value.
-		 * System.out.println(new String(result.getValue("content".getBytes(),
-		 * "count".getBytes()))); return new
-		 * String(result.getValue("content".getBytes(), "count".getBytes()));
-		 */
-		return result;
+		CellScanner cScanner = result.cellScanner();
+		return cellScannerToCellList(cScanner);
+	}
+
+	/**
+	 *
+	 * get cell by family and qualifier. qualifier can be null
+	 */
+	public static List<Cell> getCells(String tableName, String rowKey, String family) throws IOException {
+		return getCells(tableName, rowKey, family, null);
 	}
 
 	/**
@@ -136,9 +146,13 @@ public class HBaseDAO {
 	 * get Cells, by rowKey
 	 */
 	public static List<Cell> getCellsByRowKey(String tableName, String rowKey) throws IOException {
-		List<Cell> lCells = new LinkedList<>();
 		Result result = get(tableName, rowKey);
 		CellScanner cScanner = result.cellScanner();
+		return cellScannerToCellList(cScanner);
+	}
+
+	private static List<Cell> cellScannerToCellList(CellScanner cScanner) throws IOException {
+		List<Cell> lCells = new LinkedList<>();
 		while (cScanner.advance()) {
 			lCells.add(cScanner.current());
 		}
