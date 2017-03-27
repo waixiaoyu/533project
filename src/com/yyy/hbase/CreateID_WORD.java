@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.hbase.client.Put;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.yyy.json.JsonUtils;
-import com.yyy.mahout.Seqdumper;
 
 public class CreateID_WORD {
 

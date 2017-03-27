@@ -5,12 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.yyy.json.JsonUtils;
-import com.yyy.mahout.Seqdumper;
-
 public class CreateWORD_ID {
 
 	static String path = "D:\\mahout-work-ubuntu\\reuters-out-seqdir-sparse-lda\\";

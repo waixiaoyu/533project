@@ -57,5 +57,10 @@ public class KeyValuePairs {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "Pair [key=" + key + ", value=" + value + "]";
+		}
+
 	}
 }

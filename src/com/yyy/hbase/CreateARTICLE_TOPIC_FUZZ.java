@@ -12,13 +12,15 @@ import org.apache.hadoop.hbase.client.Put;
 import com.yyy.hbase.KeyValuePairs.Pair;
 import com.yyy.mahout.Seqdumper;
 
-public class CreateARTICLE_TOPIC20 {
+public class CreateARTICLE_TOPIC_FUZZ {
 
-	static String path = "D:\\mahout-work-ubuntu\\reuters-lda-topics\\";
-	static String[] inputArgs = { "-i", path + "part-m-00000", "-o", path + "lad-topics.txt" };
+	private static String path = "D:\\mahout-work-ubuntu\\reuters-lda-topics\\";
+	private static String[] inputArgs = { "-i", path + "part-m-00000", "-o", path + "lad-topics.txt" };
+	private static final double THRESHOLD = 0.2;
+
 	public static String PATH = path + File.separator + "lad-topics.txt";
 	public static String[] family = { "topic" };
-	public static String tableName = "ARTICLE_TOPIC20";
+	public static String tableName = "ARTICLE_TOPIC_FUZZ";
 
 	public static void main(String[] args) throws Exception {
 		Seqdumper.run(inputArgs);
@@ -26,7 +28,7 @@ public class CreateARTICLE_TOPIC20 {
 		HBaseDAO.createTable(tableName, family);
 		// HBaseDAO.put(tableName, "zweig", family[0], "41805");
 
-		CreateARTICLE_TOPIC20 w = new CreateARTICLE_TOPIC20();
+		CreateARTICLE_TOPIC_FUZZ w = new CreateARTICLE_TOPIC_FUZZ();
 		w.readTxtAndImport(PATH);
 	}
 
@@ -43,24 +45,28 @@ public class CreateARTICLE_TOPIC20 {
 				List<Put> lPuts = new ArrayList<>();
 
 				while ((lineTxt = bufferedReader.readLine()) != null) {
-					// System.out.println(lineTxt);
 					String[] strs = lineTxt.split("Key")[1].trim().split("Value");
 					if (strs.length == 2) {
-						// HBaseDAO.put(tableName, strs[1].trim(), family[0],
-						// strs[3].trim());
 						String key = strs[0].replaceAll(":", "").trim();
 						String value = strs[1].substring(strs[1].indexOf("{") + 1, strs[1].indexOf("}"));
 						KeyValuePairs keyValuePairs = new KeyValuePairs(value.split(","));
+						/**
+						 * first, sort the kvp. In the following loop, because
+						 * the list has been sorted from high to low, so if the
+						 * value is lower than threshold (the value is bigger,
+						 * the article is belongs to the topic in higher prob),
+						 * it can break (not write lower prob kvp to Hbase)
+						 */
 						List<Pair> pairs = keyValuePairs.sort();
 
-						for (int i = 0; i < 20; i++) {
-							// HBaseDAO.put(tableName, key, family[0],
-							// pairs.get(i).key, pairs.get(i).value.toString());
+						for (Pair p : pairs) {
+							if (p.value < THRESHOLD) {
+								break;
+							}
 							Put put = new Put(key.getBytes());
-							put.addColumn(family[0].getBytes(), pairs.get(i).key.getBytes(),
-									pairs.get(i).value.toString().getBytes());
+							put.addColumn(family[0].getBytes(), p.key.getBytes(), p.value.toString().getBytes());
 							lPuts.add(put);
-							System.out.println(key + "--" + pairs.get(i).key + "--" + pairs.get(i).value.toString());
+							System.out.println(key + "--" + p.key + "--" + p.value.toString());
 						}
 						if (key.equals("21577")) {
 							break;
