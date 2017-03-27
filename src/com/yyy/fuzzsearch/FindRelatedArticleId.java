@@ -2,12 +2,9 @@ package com.yyy.fuzzsearch;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellScanner;
 import org.apache.hadoop.hbase.CellUtil;
@@ -16,11 +13,9 @@ import org.apache.hadoop.hbase.client.Result;
 import com.yyy.hbase.HBaseDAO;
 import com.yyy.model.WordTopicProb;
 
-import edu.stanford.nlp.Tagging;
-
 /**
  * in this class, we can use Wtps (corresponding topic id) to get article id
- * from TABLE "TOPIC_ARTICLE". The number of articles must be too many, and the
+ * from TABLE "TOPIC_ARTICLE_FUZZ". The number of articles must be too many, and the
  * IDs are stored in a list
  * 
  * @author Yayu Yao
@@ -28,7 +23,7 @@ import edu.stanford.nlp.Tagging;
  */
 public class FindRelatedArticleId {
 
-	private static final String TABLE_NAME = "TOPIC_ARTICLE";
+	private static final String TABLE_NAME = "TOPIC_ARTICLE_FUZZ";
 
 	public static void main(String[] args) throws IOException {
 

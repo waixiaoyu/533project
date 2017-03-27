@@ -16,7 +16,7 @@ public class CreateARTICLE_TOPIC_FUZZ {
 
 	private static String path = "D:\\mahout-work-ubuntu\\reuters-lda-topics\\";
 	private static String[] inputArgs = { "-i", path + "part-m-00000", "-o", path + "lad-topics.txt" };
-	private static final double THRESHOLD = 0.2;
+	private static final double THRESHOLD = 0.8;
 
 	public static String PATH = path + File.separator + "lad-topics.txt";
 	public static String[] family = { "topic" };

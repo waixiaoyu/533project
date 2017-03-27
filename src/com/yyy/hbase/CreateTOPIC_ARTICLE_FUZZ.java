@@ -10,15 +10,15 @@ import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 
-public class CreateTOPIC_ARTICLE {
-	public static String desTableName = "TOPIC_ARTICLE";
-	public static String srcTableName = "ARTICLE_TOPIC";
+public class CreateTOPIC_ARTICLE_FUZZ {
+	public static String desTableName = "TOPIC_ARTICLE_FUZZ";
+	public static String srcTableName = "ARTICLE_TOPIC_FUZZ";
 	public static String[] desFamily = { "article" };
 
 	public static void main(String[] args) throws Exception {
 		HBaseDAO.deleteTable(desTableName);
 		HBaseDAO.createTable(desTableName, desFamily);
-		CreateTOPIC_ARTICLE c = new CreateTOPIC_ARTICLE();
+		CreateTOPIC_ARTICLE_FUZZ c = new CreateTOPIC_ARTICLE_FUZZ();
 		List<Put> lPuts = c.queryAndGeneratePuts(srcTableName);
 		HBaseDAO.putAll(desTableName, lPuts);
 
