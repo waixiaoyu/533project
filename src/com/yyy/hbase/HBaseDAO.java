@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellScanner;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -14,7 +13,6 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.Put;
@@ -31,10 +29,13 @@ import org.apache.hadoop.hbase.filter.SubstringComparator;
 import org.apache.hadoop.hbase.filter.ValueFilter;
 
 public class HBaseDAO {
+	private static Connection conn = null;
 	private static HBaseAdmin hBaseAdmin = null;
+
 	static {
 		try {
-			hBaseAdmin = (HBaseAdmin) HBaseUtils.getHConnection().getAdmin();
+			conn = HBaseUtils.getHConnection();
+			hBaseAdmin = (HBaseAdmin) conn.getAdmin();
 			if (hBaseAdmin == null) {
 				throw new Exception("get connection fail");
 			}
@@ -119,18 +120,12 @@ public class HBaseDAO {
 	 *
 	 * get cell by family and qualifier. qualifier can be null
 	 */
-	public static List<Cell> getCells(String tableName, String rowKey, String family, String qualifier)
-			throws IOException {
+	public static Cell getCells(String tableName, String rowKey, String family, String qualifier) throws IOException {
 		Table table = createTable(tableName);
 		Get get = new Get(rowKey.getBytes());
-		if (StringUtils.isEmpty(qualifier)) {
-			get.addFamily(family.getBytes());
-		} else {
-			get.addColumn(family.getBytes(), qualifier.getBytes());
-		}
+		get.addColumn(family.getBytes(), qualifier.getBytes());
 		Result result = table.get(get);
-		CellScanner cScanner = result.cellScanner();
-		return cellScannerToCellList(cScanner);
+		return result.getColumnLatestCell(family.getBytes(), qualifier.getBytes());
 	}
 
 	/**
@@ -138,7 +133,12 @@ public class HBaseDAO {
 	 * get cell by family and qualifier. qualifier can be null
 	 */
 	public static List<Cell> getCells(String tableName, String rowKey, String family) throws IOException {
-		return getCells(tableName, rowKey, family, null);
+		Table table = createTable(tableName);
+		Get get = new Get(rowKey.getBytes());
+		get.addFamily(family.getBytes());
+		Result result = table.get(get);
+		CellScanner cScanner = result.cellScanner();
+		return cellScannerToCellList(cScanner);
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class HBaseDAO {
 		return cellScannerToCellList(cScanner);
 	}
 
-	private static List<Cell> cellScannerToCellList(CellScanner cScanner) throws IOException {
+	public static List<Cell> cellScannerToCellList(CellScanner cScanner) throws IOException {
 		List<Cell> lCells = new LinkedList<>();
 		while (cScanner.advance()) {
 			lCells.add(cScanner.current());
@@ -250,8 +250,7 @@ public class HBaseDAO {
 		table.put(puts);
 	}
 
-	private static Table createTable(String tableName) throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		return connection.getTable(TableName.valueOf(tableName));
+	public static Table createTable(String tableName) throws IOException {
+		return conn.getTable(TableName.valueOf(tableName));
 	}
 }
