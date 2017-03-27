@@ -102,9 +102,8 @@ public class HBaseDAO {
 	 * get
 	 */
 	public static Result get(String tableName, String rowKey) throws IOException {
+		Table table = createTable(tableName);
 		Get get = new Get(rowKey.getBytes());
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
 		Result result = table.get(get);
 		/**
 		 * you can use the following sentence to get each value.
@@ -120,9 +119,8 @@ public class HBaseDAO {
 	 * get cell
 	 */
 	public static Result getCell(String tableName, String rowKey) throws IOException {
+		Table table = createTable(tableName);
 		Get get = new Get(rowKey.getBytes());
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
 		Result result = table.get(get);
 		/**
 		 * you can use the following sentence to get each value.
@@ -151,8 +149,7 @@ public class HBaseDAO {
 	 * scan operation of different type of filters
 	 */
 	public static List<Result> scanRowKeyByFilter(String tableName, Filter filter) throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
+		Table table = createTable(tableName);
 		Scan scan = new Scan();
 		scan.setFilter(filter);
 		ResultScanner resultScanner = table.getScanner(scan);
@@ -181,8 +178,7 @@ public class HBaseDAO {
 	 */
 	public static List<Result> scanColumnByFilter(String tableName, String family, String qualifier, Filter filter)
 			throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
+		Table table = createTable(tableName);
 		Scan scan = new Scan();
 		if (qualifier == null || qualifier.equals("")) {
 			scan.addFamily(family.getBytes());
@@ -222,24 +218,26 @@ public class HBaseDAO {
 	 */
 	public static void put(String tableName, String rowKey, String family, String qualifier, String value)
 			throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
+		Table table = createTable(tableName);
 		Put put = new Put(rowKey.getBytes());
 		put.addColumn(family.getBytes(), qualifier.getBytes(), value.getBytes());
 		table.put(put);
 	}
 
 	public static void put(String tableName, String rowKey, String family, String value) throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
+		Table table = createTable(tableName);
 		Put put = new Put(rowKey.getBytes());
 		put.addColumn(family.getBytes(), null, value.getBytes());
 		table.put(put);
 	}
 
 	public static void putAll(String tableName, List<Put> puts) throws IOException {
-		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
-		Table table = connection.getTable(TableName.valueOf(tableName));
+		Table table = createTable(tableName);
 		table.put(puts);
+	}
+
+	private static Table createTable(String tableName) throws IOException {
+		Connection connection = ConnectionFactory.createConnection(HBaseUtils.getConfiguration());
+		return connection.getTable(TableName.valueOf(tableName));
 	}
 }
