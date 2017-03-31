@@ -2,6 +2,7 @@ package com.yyy.fuzzsearch;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +72,14 @@ public class FuzzSearch {
 			}
 			System.out.println(id);
 		}
+		// sort by max score
+		lAms.sort(new Comparator<ArticleMeasure>() {
+			@Override
+			public int compare(ArticleMeasure o1, ArticleMeasure o2) {
+				return (int) Math.signum(o2.getMaxScore() - o1.getMaxScore());
+			}
+		});
+		return;
 	}
 
 	@Deprecated
@@ -86,7 +95,7 @@ public class FuzzSearch {
 	 * @return
 	 * @throws IOException
 	 */
-	public ArticleMeasure getArticleAMById(String rowKey) throws IOException {
+	private ArticleMeasure getArticleAMById(String rowKey) throws IOException {
 
 		Get get = new Get(rowKey.getBytes());
 		get.addFamily("article".getBytes());
@@ -109,19 +118,20 @@ public class FuzzSearch {
 	/**
 	 * use source sentence to match target sentence, and return a score
 	 */
-	public double matchSentence(String srcSen, String tarSen) {
+	private double computeSentenceScore(String srcSen, String tarSen) {
 		double dScore = 0;
 		dScore = cc.calculateRBFSimilarity(srcSen, tarSen);
 		return dScore;
 	}
 
 	/**
-	 * use source sentence to match target article, and return a highest score
+	 * use source sentence to match target article, and return scores sentence
+	 * by sentence, which store in AM
 	 */
-	public ArticleMeasure matchArticle(String srcSen, ArticleMeasure am) {
+	private ArticleMeasure matchArticle(String srcSen, ArticleMeasure am) {
 		String[] sentences = am.getContent().trim().split(SEPARATOR_DOT);
 		for (String string : sentences) {
-			am.addScore(matchSentence(srcSen, string.trim()));
+			am.addScore(computeSentenceScore(srcSen, string.trim()));
 			am.addSentence(string);
 		}
 		return am;

@@ -11,8 +11,12 @@ public class ArticleMeasure {
 	private String content;
 	private String title;
 
+	private double maxScore = Double.NEGATIVE_INFINITY;
+	private int maxId = -1;
+
 	public void addScore(double d) {
 		lScores.add(d);
+		modifyMax(d);
 	}
 
 	public void addSentence(String str) {
@@ -44,6 +48,12 @@ public class ArticleMeasure {
 		return lScores.size();
 	}
 
+	/**
+	 * you can use {@link #maxScore()}
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	public double max() {
 		double dMax = Double.NEGATIVE_INFINITY;
 		for (Double double1 : lScores) {
@@ -52,6 +62,14 @@ public class ArticleMeasure {
 		return dMax;
 	}
 
+	private void modifyMax(double d) {
+		if (d > this.maxScore) {
+			this.maxScore = d;
+			this.maxId = size() - 1;
+		}
+	}
+
+	@Deprecated
 	public double min() {
 		double dMin = Double.POSITIVE_INFINITY;
 		for (Double double1 : lScores) {
@@ -60,9 +78,17 @@ public class ArticleMeasure {
 		return dMin;
 	}
 
+	public double getMaxScore() {
+		return maxScore;
+	}
+
+	public int getMaxId() {
+		return maxId;
+	}
+
 	@Override
 	public String toString() {
-		return "ArticleMeasure [Mean of Scores=" + this.mean() + "]";
+		return "ArticleMeasure [Mean of Scores=" + this.mean() + " Max of Scores=" + this.getMaxScore() + "]";
 	}
 
 	public String getId() {
