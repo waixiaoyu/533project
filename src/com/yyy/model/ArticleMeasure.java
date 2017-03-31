@@ -5,21 +5,27 @@ import java.util.List;
 
 public class ArticleMeasure {
 	private List<Double> lScores;
+	private List<String> lSentences;
 
 	private String id;
 	private String content;
 	private String title;
 
-	public void add(double d) {
+	public void addScore(double d) {
 		lScores.add(d);
+	}
+
+	public void addSentence(String str) {
+		lSentences.add(str);
 	}
 
 	public ArticleMeasure(String id, String content, String title) {
 		super();
 		this.lScores = new ArrayList<>();
+		this.lSentences = new ArrayList<>();
 		this.id = id;
 		this.content = content;
-		this.title=title;
+		this.title = title;
 	}
 
 	public double sum() {
@@ -69,6 +75,22 @@ public class ArticleMeasure {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public Double getlScores(int index) {
+		return lScores.get(index);
+	}
+
+	public String getlSentences(int index) {
+		return lSentences.get(index);
+	}
+
+	public List<Double> getlScores() {
+		return lScores;
+	}
+
+	public List<String> getlSentences() {
+		return lSentences;
 	}
 
 }

@@ -50,7 +50,6 @@ public class FuzzSearch {
 		}
 		f.getHighestProbInTopic(wtps);
 
-
 		Iterator<WordTopicProb> it = wtps.iterator();
 		while (it.hasNext()) {
 			WordTopicProb wordTopicProb = (WordTopicProb) it.next();
@@ -122,7 +121,8 @@ public class FuzzSearch {
 	public ArticleMeasure matchArticle(String srcSen, ArticleMeasure am) {
 		String[] sentences = am.getContent().trim().split(SEPARATOR_DOT);
 		for (String string : sentences) {
-			am.add(matchSentence(srcSen, string.trim()));
+			am.addScore(matchSentence(srcSen, string.trim()));
+			am.addSentence(string);
 		}
 		return am;
 	}
